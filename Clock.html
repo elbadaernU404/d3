@@ -1,0 +1,219 @@
+<!DOCTYPE html><html><head>
+<style>
+body {
+    background: #AFEEEE;
+}
+.clocks {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    width: 50%;
+    text-align: center;
+}
+.clocks .clock {
+    width: 50%;
+}
+.clocks .digital-clock {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    color: #ff8c00;
+    font-size: 55px;
+    width: 100%;
+    margin-top: 35px;
+}
+
+.clocks .button {
+    text-align: center;
+    width: 100%;
+    margin-top: 35px;
+}
+</style>
+</head>
+<body>
+<script type="text/javascript" src="./jquery-2.1.1.min.js"></script><script src="./TweenMax.min.js"></script>
+<div class="clocks">
+    <svg viewBox="-1024 -1024 2048 2048" class="clock">
+        <title>Clock</title>
+        <style type="text/css">
+            .bg {
+                stroke: none;
+                fill: #AFEEEE;
+            }
+            .fc {
+                stroke: none;
+                fill: #008080;
+            }
+            .h1 {
+                stroke: none;
+                fill: #FFA100;
+            }
+            .h2 {
+                stroke: none;
+                fill: #00BFFF;
+            }
+            .h3 {
+                stroke: none;
+                fill: #D4143C;
+            }
+        </style>
+        <defs>
+            <path id="mark1" d="M -20,-1000 l.2 40,0 0,100 -40,0 z" />
+            <path id="mark2" d="M -40,-1000 l.2 180,0 80,40 -120,0 z" />
+            <path id="mark3" d="M -40,-1000 l.2 180 0 80,40 -120,80 z" />
+            <path id="handh" d="M -50,-600  l 50,-50 50,50 0,800  -100,0 z" />
+            <path id="handm" d="M -40,-900  l 40,-40 40,40 0,1180 -80,0  z" />
+            <g id="hands">
+                <path d="M -10,-910 l  10,-10 10,10 2,300 -24,0 z
+                 M -13,-390 l  26,0         7,690 -40,0 z" />
+                <path d="M   0,-620 a 120,120 0 0 1 0,240
+                            a 120,120 0 0 1 0,-240 z
+                 M   0,-560 a  60,60  0 0 0 0,120
+                            a  60,60  0 0 0 0,-120 z" />
+            </g>
+            <g id="face1">
+                <use xlink:href="#mark1" transform="rotate(06)" />
+                <use xlink:href="#mark1" transform="rotate(12)" />
+                <use xlink:href="#mark1" transform="rotate(18)" />
+                <use xlink:href="#mark1" transform="rotate(24)" />
+            </g>
+            <g id="face2">
+                <use xlink:href="#face1" />
+                <use xlink:href="#face1" transform="rotate(30)" />
+                <use xlink:href="#face1" transform="rotate(60)" />
+                <use xlink:href="#mark3" />
+                <use xlink:href="#mark2" transform="rotate(30)" />
+                <use xlink:href="#mark2" transform="rotate(60)" />
+            </g>
+            <g id="face">
+                <use xlink:href="#face2" />
+                <use xlink:href="#face2" transform="rotate(90)" />
+                <use xlink:href="#face2" transform="rotate(180)" />
+                <use xlink:href="#face2" transform="rotate(270)" />
+            </g>
+        </defs>
+        <circle class="bg" r="1024" />
+        <use xlink:href="#face" class="fc" />
+
+        <use xlink:href="#handm" class="h2 minutes" transform="rotate(54)" />
+        <use xlink:href="#handh" class="h1 hours" transform="rotate(304.5)" />
+        <use xlink:href="#hands" class="h3 seconds" transform="rotate(12)" />
+        <!-- hands at 10:09:02 -->
+    </svg>
+
+    <div class="digital-clock">
+        <span class="digital-hours"></span>:
+        <span class="digital-minutes"></span>:
+        <span class="digital-seconds"></span>
+    </div>
+
+    <div class="button">
+<div style="text-align:center"><button><a href="./index.html" class="white" style="text-decoration:none">Back</a></button></div>
+    </div>
+
+</div>
+<script>
+'use strict';
+
+var DEGREES = 360;
+var SEC_IN_MIN = 60;
+var MIN_IN_HOUR = 60;
+var HOUR_IN_LOOP = 12;
+var SEC_IN_HOURS = 3600;
+var DEGREES_PER_MIN = DEGREES / MIN_IN_HOUR;
+var DEGREES_PER_HOUR = DEGREES / HOUR_IN_LOOP;
+var SECOND_DEGREES_PER_SECOND = DEGREES / SEC_IN_MIN;
+var MINUTE_DEGREES_PER_SECOND = SECOND_DEGREES_PER_SECOND / MIN_IN_HOUR;
+var HOUR_DEGREES_PER_SECOND = MINUTE_DEGREES_PER_SECOND / HOUR_IN_LOOP;
+var tl = new TimelineMax();
+
+var moveSeconds = function moveSeconds() {
+    TweenMax.to('.seconds', 1, {
+        rotation: "+=" + SECOND_DEGREES_PER_SECOND,
+        onComplete: function onComplete() {
+            moveSeconds();
+        }
+    });
+};
+
+var moveMinutes = function moveMinutes() {
+    TweenMax.to('.minutes', 1, {
+        rotation: "+=" + MINUTE_DEGREES_PER_SECOND,
+        onComplete: function onComplete() {
+            moveMinutes();
+        }
+    });
+};
+
+var moveHours = function moveHours() {
+    TweenMax.to('.hours', 1, {
+        rotation: "+=" + HOUR_DEGREES_PER_SECOND,
+        onComplete: function onComplete() {
+            moveHours();
+        }
+    });
+};
+
+var getCurrentTime = function getCurrentTime() {
+    var t = new Date();
+    var hours = t.getHours() % 12;
+    hours = hours ? hours : 12;
+    return {
+        hours: hours >= 10 ? hours : '0' + hours,
+        minutes: t.getMinutes() >= 10 ? t.getMinutes() : '0' + t.getMinutes(),
+        seconds: t.getSeconds() >= 10 ? t.getSeconds() : '0' + t.getSeconds()
+    };
+};
+
+var updateDigitalClock = function updateDigitalClock(time) {
+    var $hours = $('.digital-hours');
+    var $minutes = $('.digital-minutes');
+    var $seconds = $('.digital-seconds');
+
+    $hours.text(time.hours);
+    $minutes.text(time.minutes);
+    $seconds.text(time.seconds);
+};
+
+var startClocks = function startClocks() {
+    var t = getCurrentTime();
+    var intHours = parseInt(t.hours, 10);
+    var intMins = parseInt(t.minutes, 10);
+    var intSecs = parseInt(t.seconds, 10);
+    var secDegrees = intSecs * SECOND_DEGREES_PER_SECOND - SECOND_DEGREES_PER_SECOND;
+    var minDegrees = (intMins + intSecs / SEC_IN_MIN) * DEGREES_PER_MIN;
+    var hourDegrees = (intHours + intMins / MIN_IN_HOUR + intSecs / SEC_IN_HOURS) * DEGREES_PER_HOUR;
+
+
+    updateDigitalClock(t);
+
+    TweenMax.set('.seconds', {
+        svgOrigin: "1 1",
+        rotation: secDegrees
+    });
+
+    TweenMax.set('.minutes', {
+        svgOrigin: "0 0",
+        rotation: minDegrees
+    });
+
+    TweenMax.set('.hours', {
+        svgOrigin: '0 0',
+        rotation: hourDegrees
+    });
+
+    moveSeconds();
+    moveMinutes();
+    moveHours();
+
+    setInterval(function() {
+        t = getCurrentTime();
+        updateDigitalClock(t);
+    }, 1000);
+};
+
+startClocks();
+</script>
+</body>
+</html>
